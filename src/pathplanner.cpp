@@ -37,16 +37,15 @@ int main(int argc,char** argv){
 			if(sonar[0]>SAFE_DISTANCE||sonar[2]>SAFE_DISTANCE){
 				steer_msg.speed=SPEED;
 				if(sonar[0]>sonar[1])
-					//directionMsg.data = "left";
-					steer_msg.angle=MOVE;
+					steer_msg.angle = -1*MOVE;	// Left
 				else
-					steer_msg.angle=-1*MOVE;
+					steer_msg.angle = MOVE;	// Right
 			}
 			else
-				steer_msg.speed=STOP;
+				steer_msg.speed = STOP;	//Stop
 		}
 		else
-			steer_msg.speed=SPEED;
+			steer_msg.speed = SPEED;	//Forward
 		steerPub.publish( steer_msg );
 		loop_rate.sleep();
 		ros::spinOnce();
