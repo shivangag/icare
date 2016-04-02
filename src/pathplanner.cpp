@@ -38,31 +38,30 @@ int main(int argc,char** argv){
 	
 
 	sonarSub = n.subscribe("sonar",50,sonarCallback);
-	//ros::spin();
-
 	while(ros::ok()){
-		/*if(straightDistance<SAFE_DISTANCE){
-			if(leftDistance>SAFE_DISTANCE||rightDistance>SAFE_DISTANCE){
-				if(leftDistance>rightDistance)
-					directionMsg.data = "left";
+		if(sonar[1]<SAFE_DISTANCE){
+			if(sonar[0]>SAFE_DISTANCE||sonar[2]>SAFE_DISTANCE){
+				if(sonar[0]>sonar[1])
+					//directionMsg.data = "left";
+					angle_msg.data=-1;
 				else
-					directionMsg.data = "right";
+					angle_msg.data=1;
 			}
 			else
-				directionMsg.data = "stop";
+				angle_msg.data=-99;
 		}
 		else
-			directionMsg.data = "forward";
-		motorPub.publish( directionMsg );
+			angle_msg.data=100;
+		handleAnglePub.publish( angle_msg );
 		loop_rate.sleep();
-		ros::spinOnce();*/
+		ros::spinOnce();
 		//Heading();
 		//angle_msg.data=count++;
 		//handleAnglePub.publish(angle_msg);
 		//ros::spinOnce();
 		//loop_rate.sleep();
-		Heading();
-		ros::spinOnce();
+		//Heading();
+		//ros::spinOnce();
 	}
 	
 }
@@ -72,13 +71,16 @@ void Heading()
 {
 
 	if(sonar[0] < obstacle && sonar[1] < obstacle && sonar[2] < obstacle)
-		{Brake();}
+		{Brake();
+			return;}
 	if(sonar[0]<sonar[1]&&sonar[0]<sonar[2])
-		{changeDIR(1);}
+		{changeDIR(1);return;}
 	else if(sonar[1]<sonar[0]&&sonar[1]<sonar[2])
-		{changeDIR(2);}
+		{changeDIR(2);
+			return;}
 	else if(sonar[2]<sonar[1]&&sonar[2]<sonar[0])
-		{changeDIR(3);}
+		{changeDIR(3);
+			return;}
 }
 void changeDIR(int Obstructed_sonar)
 {
