@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/String.h"
-#include "icare/sonar.h"
+#include "geometry_msgs/Point.h"
 #define MAX_DISTANCE 200
 #define SAFE_DISTANCE 50
 #define move 15
@@ -21,23 +21,25 @@ void changeDIR(int);
 void Update(float);
 void Brake(void);
 
-void sonarCallback(const icare::sonar::ConstPtr& msg){
-	sonar[0] = msg->sonarLeft;
-	sonar[1] = msg->sonarFront;
-	sonar[2] = msg->sonarRight;
+void sonarCallback(const geometry_msgs::Point::ConstPtr& msg){
+	sonar[0] = msg->x;
+	sonar[1] = msg->y;
+	sonar[2] = msg->z;
 	ROS_INFO("%f %f %f",sonar[0], sonar[1], sonar[2]);
 }
 
 int main(int argc,char** argv){
-	std_msgs::Float count=0;
+	float count=0;
 	ros::init(argc,argv,"pathplanner");
 	ros::NodeHandle n;
-	handleAnglePub = n.advertise<std_msgs::Float32>("Handle_angle",500);
-	ros::Rate loop_rate(10);
-	ros::spinOnce();
 
-	sonarSub = n.subscribe("sonar",1000,sonarCallback);
-	ros::spin();
+	handleAnglePub = n.advertise<std_msgs::Float32>("Handle_angle",50);
+	ros::Rate loop_rate(100);
+	
+
+	sonarSub = n.subscribe("sonar",50,sonarCallback);
+	//ros::spin();
+
 	while(ros::ok()){
 		/*if(straightDistance<SAFE_DISTANCE){
 			if(leftDistance>SAFE_DISTANCE||rightDistance>SAFE_DISTANCE){
@@ -55,10 +57,14 @@ int main(int argc,char** argv){
 		loop_rate.sleep();
 		ros::spinOnce();*/
 		//Heading();
-		handleAnglePub.publish(++count);
+		//angle_msg.data=count++;
+		//handleAnglePub.publish(angle_msg);
+		//ros::spinOnce();
+		//loop_rate.sleep();
+		Heading();
 		ros::spinOnce();
-		loop_rate.sleep();
 	}
+	
 }
 
 
@@ -102,18 +108,17 @@ void Update(float angle)
 	handle_angle = angle;
 	angle_msg.data = handle_angle;
 	handleAnglePub.publish(angle_msg);
-	ros::spinOnce();
-	while(sonar[0] < obstacle && sonar[1] < obstacle && sonar[2] < obstacle);
+	while(sonar[0] < obstacle && sonar[1] < obstacle && sonar[2] < obstacle){
+		ros::spinOnce();
+	}
 	handle_angle = 0;
 	angle_msg.data = handle_angle;
 	handleAnglePub.publish(angle_msg);	
-	ros::spinOnce();
 }
 void Brake()
 {
 	//braking 
 	angle_msg.data = -999;
 	handleAnglePub.publish(angle_msg);
-	ros::spinOnce();
 
 }
